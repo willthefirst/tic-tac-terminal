@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// todo: prevent bad coords/already taken spots
+// todo: allow to restart a new game
+
 const chalk = require("chalk");
 const readline = require("readline");
 const args = process.argv;
@@ -40,7 +43,7 @@ const printUsage = function () {
 };
 
 /**
-* Prints out the current board state
+* Prints current board state
 */
 function showBoard() {
     let result = ``;
@@ -63,71 +66,49 @@ function showBoard() {
 */
 const start = function () {
     promptMove();
-    
-    // Every turn
-    
-    // Print out board state
-    // Prompt player for X coordinate
-    // Prompt player for Y coordinate
-    // Check to see if there is a three in a row condition.
 };
 
-function noWinner() {
+/**
+* Checks board for three in a row.
+* Looks at the row and column of the current move, then both diagonals.
+* @param  {number} xCoord
+* @param  {number} yCoord
+*/
+function noWinner(xCoord, yCoord) {
     // 0,0, 1,0, 2,0
     // 0,1, 1,1, 2,1
     // 0,2, 1,2, 2,2
     
     const board = gameState.board;
-
-    // Check horizontal
+    
+    // Check current row
+    if (board[yCoord].every(isCurrentPlayer)) {
+        return false;
+    }
+    
+    // Check current column
+    const currColumn = [];
+    
     for (let i = 0; i < board.length; i++) {
-        const row = board[i];
-
-        if (row.every(isCurrentPlayer)) {
-            return false;
-        }
+        currColumn.push(board[i][xCoord]);
     }
-
-    console.log("No win from horizontals.")
-
-    // Check vertical
-    for (let y = 0; y < board.length; y++) {
-        const row = board[y];
-        const testArray = [];
-
-        for (let x = 0; x < row.length; x++) {
-            testArray.push(board[x][y]);
-        }
-        testArray.push(board[0][0]);
-        testArray.push(board[0][1]);
-        testArray.push(board[0][2]);
+    
+    if (currColumn.every(isCurrentPlayer)) {
+        return false;
     }
-
-    console.log("No win from verticals.")
-
+    
     // Check diagonals
     const diagonals = [
-      [
-        board[0][0],
-        board[1][1],
-        board[2][2],
-      ],
-      [
-        board[0][2],
-        board[1][1],
-        board[2][0],
-      ],
+        [board[0][0], board[1][1], board[2][2]],
+        [board[0][2], board[1][1], board[2][0]],
     ];
-
+    
     for (let i = 0; i < diagonals.length; i++) {
-        const coordinates = diagonals[i];
         if (diagonals[i].every(isCurrentPlayer)) {
             return false;
         }
     }
-
-    console.log("No win from diagonals.")
-
+    
     return true;
 }
 
@@ -149,8 +130,8 @@ const promptMove = function () {
     rl.question("Enter X coordinate for your move: ", (x) => {
         rl.question("Enter Y coordinate for your move: ", (y) => {
             gameState.board[y][x] = gameState.currentPlayer;
-            if (noWinner()) {
-                console.log("");
+            console.log("");
+            if (noWinner(x, y)) {
                 promptMove();
             } else {
                 declareWinner();
@@ -160,6 +141,7 @@ const promptMove = function () {
 };
 
 function declareWinner() {
+    showBoard();
     console.log(`${gameState.currentPlayer} has won! Game over.`);
 }
 
