@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 const chalk = require("chalk");
+const readline = require("readline");
 const args = process.argv;
 
 /**
  * Prints usage instructions.
  */
-const printUsage = function() {
-    const instructions = `
+const printUsage = function () {
+  const instructions = `
 Tic Tac Toe (by Will Moritz)
 
 usage: 
@@ -15,27 +16,39 @@ usage:
     tic-tac-toe <command>
 
     commands can be:
-        start:    start a new game˝
+        start:    start a new game
         help:     show instructions
     `;
 
-    console.log(instructions);
-}
+  console.log(instructions);
+};
+
 /**
  * Initializes a new game.
  */
-const start = function() {
-    console.log("Game starts here.")
-}
+const start = function () {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  rl.question("What do you think of Node.js? ", (answer) => {
+    // TODO: Log the answer in a database
+    console.log(`Thank you for your valuable feedback: ${answer}`);
+
+    rl.close();
+  });
+};
 
 switch (args[2]) {
-    case 'start':
-        start();
-        break;
-    case 'help':
-        printUsage();
-        break;
-    default:
-        printUsage();
-        break;
+  case "start":
+    start();
+    break;
+  case "help":
+    printUsage();
+    break;
+  default:
+    console.log(`invalid argument: ${args[2]}`);
+    printUsage();
+    break;
 }
