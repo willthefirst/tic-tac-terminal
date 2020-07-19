@@ -5,82 +5,121 @@ const readline = require("readline");
 const args = process.argv;
 
 const gameState = {
-  board: [
-    ["X", "_", "_"],
-    ["_", "O", "_"],
-    ["_", "_", "_"],
-  ],
+    currentPlayer: "X",
+    board: [
+        ["_", "_", "_"],
+        ["_", "_", "_"],
+        ["_", "_", "_"],
+    ],
 };
 
+// Set up readline
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: "",
+});
+
 /**
- * Prints usage instructions.
- */
+* Prints usage instructions.
+*/
 const printUsage = function () {
-  const instructions = `
-Tic Tac Toe (by Will Moritz)
-
-usage: 
-
-tic-tac-toe <command>
-
-commands can be:
+    const instructions = `
+    Tic Tac Toe (by Will Moritz)
+    
+    usage: 
+    
+    tic-tac-toe <command>
+    
+    commands can be:
     start:    start a new game
     help:     show instructions
     `;
-
-  console.log(instructions);
-};
-
-const showBoard = function (boardArray) {
-  let result = ``;
-
-  for (let i = 0; i < boardArray.length; i++) {
-    const row = boardArray[i];
-    let rowString = ``;
-    for (let j = 0; j < row.length; j++) {
-      const cell = row[j];
-      rowString = rowString + cell + " ";
-    }
-    result = result + rowString + "\n";
-  }
-
-  console.log(result);
+    
+    console.log(instructions);
 };
 
 /**
- * Starts a new game
- */
+* Prints out the current board state
+*/
+function showBoard() {
+    let result = ``;
+    
+    for (let i = 0; i < gameState.board.length; i++) {
+        const row = gameState.board[i];
+        let rowString = `   `;
+        for (let j = 0; j < row.length; j++) {
+            const cell = row[j];
+            rowString = rowString + cell + " ";
+        }
+        result = result + rowString + "\n";
+    }
+    
+    console.log(chalk.green(result));
+}
+
+/**
+* Starts a new game
+*/
 const start = function () {
-  showBoard(gameState.board);
+    promptMove();
+    
+    // Every turn
+    
+    // Print out board state
+    // Prompt player for X coordinate
+    // Prompt player for Y coordinate
+    // Check to see if there is a three in a row condition.
+};
+
+function checkForWin() {
+    // Check horizontal
+    // Check vertical
+    // Check diagonal
+}
+
+const promptMove = function () {
+    // Switch player
+    if (gameState.currentPlayer === "X") {
+        gameState.currentPlayer = "O";
+    } else {
+        gameState.currentPlayer = "X";
+    }
+    
+    showBoard();
+    
+    console.log(`${gameState.currentPlayer}'s turn:\n`);
+    rl.question("Enter X coordinate for your move: ", (x) => {
+        rl.question("Enter Y coordinate for your move: ", (y) => {
+            gameState.board[y][x] = gameState.currentPlayer;
+            checkForWin();
+            console.log("");
+            promptMove();
+        });
+    });
 };
 
 /**
- * Initializes interactive console.
- */
+* Initializes interactive console.
+*/
 const init = function () {
-  // Set up readline
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  const commands = {
-    start: start,
-    help: printUsage,
-  };
-  printUsage();
-
-  rl.prompt();
-
-  // Listen for user input
-  rl.on("line", (input) => {
-    input = input.toLowerCase();
-    if (input in commands) {
-      commands[input]();
-    } else {
-      console.log(`Invalid argument: ${input}`);
-    }
-  });
+    const commands = {
+        start: start,
+        help: printUsage,
+    };
+    
+    printUsage();
+    start();
+    
+    // // Listen for user input
+    // rl.on("line", (input) => {
+    //     input = input.toLowerCase();
+    //     if (input in commands) {
+    //         commands[input]();
+    //     } else {
+    //         console.log(`Invalid argument: ${input}`);
+    //     }
+    // });
 };
 
 init();
