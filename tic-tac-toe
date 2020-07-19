@@ -72,10 +72,67 @@ const start = function () {
     // Check to see if there is a three in a row condition.
 };
 
-function checkForWin() {
+function noWinner() {
+    // 0,0, 1,0, 2,0
+    // 0,1, 1,1, 2,1
+    // 0,2, 1,2, 2,2
+    
+    const board = gameState.board;
+
     // Check horizontal
+    for (let i = 0; i < board.length; i++) {
+        const row = board[i];
+
+        if (row.every(isCurrentPlayer)) {
+            return false;
+        }
+    }
+
+    console.log("No win from horizontals.")
+
     // Check vertical
-    // Check diagonal
+    for (let y = 0; y < board.length; y++) {
+        const row = board[y];
+        const testArray = [];
+
+        for (let x = 0; x < row.length; x++) {
+            testArray.push(board[x][y]);
+        }
+        testArray.push(board[0][0]);
+        testArray.push(board[0][1]);
+        testArray.push(board[0][2]);
+    }
+
+    console.log("No win from verticals.")
+
+    // Check diagonals
+    const diagonals = [
+      [
+        board[0][0],
+        board[1][1],
+        board[2][2],
+      ],
+      [
+        board[0][2],
+        board[1][1],
+        board[2][0],
+      ],
+    ];
+
+    for (let i = 0; i < diagonals.length; i++) {
+        const coordinates = diagonals[i];
+        if (diagonals[i].every(isCurrentPlayer)) {
+            return false;
+        }
+    }
+
+    console.log("No win from diagonals.")
+
+    return true;
+}
+
+function isCurrentPlayer(cell) {
+    return cell === gameState.currentPlayer;
 }
 
 const promptMove = function () {
@@ -92,12 +149,19 @@ const promptMove = function () {
     rl.question("Enter X coordinate for your move: ", (x) => {
         rl.question("Enter Y coordinate for your move: ", (y) => {
             gameState.board[y][x] = gameState.currentPlayer;
-            checkForWin();
-            console.log("");
-            promptMove();
+            if (noWinner()) {
+                console.log("");
+                promptMove();
+            } else {
+                declareWinner();
+            }
         });
     });
 };
+
+function declareWinner() {
+    console.log(`${gameState.currentPlayer} has won! Game over.`);
+}
 
 /**
 * Initializes interactive console.
