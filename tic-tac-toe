@@ -4,6 +4,14 @@ const chalk = require("chalk");
 const readline = require("readline");
 const args = process.argv;
 
+const gameState = {
+  board: [
+    ["X", "_", "_"],
+    ["_", "O", "_"],
+    ["_", "_", "_"],
+  ],
+};
+
 /**
  * Prints usage instructions.
  */
@@ -13,42 +21,66 @@ Tic Tac Toe (by Will Moritz)
 
 usage: 
 
-    tic-tac-toe <command>
+tic-tac-toe <command>
 
-    commands can be:
-        start:    start a new game
-        help:     show instructions
+commands can be:
+    start:    start a new game
+    help:     show instructions
     `;
 
   console.log(instructions);
 };
 
+const showBoard = function (boardArray) {
+  let result = ``;
+
+  for (let i = 0; i < boardArray.length; i++) {
+    const row = boardArray[i];
+    let rowString = ``;
+    for (let j = 0; j < row.length; j++) {
+      const cell = row[j];
+      rowString = rowString + cell + " ";
+    }
+    result = result + rowString + "\n";
+  }
+
+  console.log(result);
+};
+
 /**
- * Initializes a new game.
+ * Starts a new game
  */
 const start = function () {
+  showBoard(gameState.board);
+};
+
+/**
+ * Initializes interactive console.
+ */
+const init = function () {
+  // Set up readline
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
-  rl.question("What do you think of Node.js? ", (answer) => {
-    // TODO: Log the answer in a database
-    console.log(`Thank you for your valuable feedback: ${answer}`);
+  const commands = {
+    start: start,
+    help: printUsage,
+  };
+  printUsage();
 
-    rl.close();
+  rl.prompt();
+
+  // Listen for user input
+  rl.on("line", (input) => {
+    input = input.toLowerCase();
+    if (input in commands) {
+      commands[input]();
+    } else {
+      console.log(`Invalid argument: ${input}`);
+    }
   });
 };
 
-switch (args[2]) {
-  case "start":
-    start();
-    break;
-  case "help":
-    printUsage();
-    break;
-  default:
-    console.log(`invalid argument: ${args[2]}`);
-    printUsage();
-    break;
-}
+init();
