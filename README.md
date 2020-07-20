@@ -2,6 +2,5 @@
 
 To play:
 ```
-cd tic-tac-toe
-tic-tac-toe
+cd tic-tac-toe && tic-tac-toe
 ```
