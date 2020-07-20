@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 
-// todo refactor
-
-const chalk = require("chalk");
 const readline = require("readline");
-const args = process.argv;
+const chalk = require("chalk");
 
 const gameState = {
   currentPlayer: chalk.red("X"),
@@ -81,6 +78,49 @@ function startGameWithAI() {
 }
 
 /**
+ * Prompts user for coordinates and saves to gameState
+ */
+const promptMove = function () {
+  console.log(`---------------------------------`);
+  console.log(`Turn ${gameState.turnNumber} ~ ${gameState.currentPlayer}'s move:\n`);
+  showBoard();
+  rl.question("Enter X coordinate: ", (x) => {
+    rl.question("Enter Y coordinate: ", (y) => {
+      console.log("");
+      if (!coordinatesAreValid(x, y)) {
+        promptMove();
+        return;
+      }
+      gameState.board[y][x] = gameState.currentPlayer;
+
+      if (noWinner(x, y)) {
+        nextTurn();
+        promptMove();
+      } else {
+        declareWinner();
+      }
+    });
+  });
+};
+
+/**
+ * Returns false if coordinates are invalid or already occupied
+ * @param {number} x - Attempted move's X coordinate
+ * @param {number} y - Attempted move's Y coordinate
+ */
+function coordinatesAreValid(x, y) {
+  if (x < 0 || x > 2 || y < 0 || y > 2) {
+    console.error(chalk.red("Coordinates are invalid.\n"));
+    return false;
+  } else if (gameState.board[y][x] !== "_") {
+    console.error(chalk.red("You may not play that position. Try again.\n"));
+    return false;
+  } else {
+    return true;
+  }
+}
+
+/**
  * Checks board for three in a row.
  * Looks at the row and column of the current move, then both diagonals.
  * @param  {number} xCoord
@@ -121,6 +161,13 @@ function noWinner(xCoord, yCoord) {
 }
 
 /**
+ * @param  {string} cell - Checks whether a cell corresponds to the current player.
+ */
+function isCurrentPlayer(cell) {
+  return cell === gameState.currentPlayer;
+}
+
+/**
  * Switches players
  */
 function nextTurn() {
@@ -131,58 +178,6 @@ function nextTurn() {
   }
 
   gameState.turnNumber++;
-}
-
-/**
- * Prompts user for coordinates and saves to gameState
- */
-const promptMove = function () {
-  console.log(`---------------------------------`);
-  console.log(`Turn ${gameState.turnNumber} ~ ${gameState.currentPlayer}'s move:\n`);
-  showBoard();
-  rl.question("Enter X coordinate: ", (x) => {
-    rl.question("Enter Y coordinate: ", (y) => {
-      console.log("");
-
-      if (!coordinatesAreValid(x, y)) {
-        promptMove();
-        return;
-      }
-
-      gameState.board[y][x] = gameState.currentPlayer;
-
-      if (noWinner(x, y)) {
-        nextTurn();
-        promptMove();
-      } else {
-        declareWinner();
-      }
-    });
-  });
-};
-
-/**
- * Returns false if coordinates are invalid or already occupied
- * @param {number} x - Attempted move's X coordinate
- * @param {number} y - Attempted move's Y coordinate
- */
-function coordinatesAreValid(x, y) {
-  if (x < 0 || x > 2 || y < 0 || y > 2) {
-    console.error(chalk.red("Coordinates are invalid.\n"));
-    return false;
-  } else if (gameState.board[y][x] !== "_") {
-    console.error(chalk.red("You may not play that position. Try again.\n"));
-    return false;
-  } else {
-    return true;
-  }
-}
-
-/**
- * @param  {string} cell - Checks whether a cell corresponds to the current player.
- */
-function isCurrentPlayer(cell) {
-  return cell === gameState.currentPlayer;
 }
 
 /**
