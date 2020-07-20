@@ -1,154 +1,162 @@
 #!/usr/bin/env node
 
-// todo: prevent bad coords/already taken spots
-// todo: allow to restart a new game
-
 const chalk = require("chalk");
 const readline = require("readline");
 const args = process.argv;
 
 const gameState = {
-    currentPlayer: "X",
-    board: [
-        ["_", "_", "_"],
-        ["_", "_", "_"],
-        ["_", "_", "_"],
-    ],
-};
-
-// Set up readline
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: "",
-});
-
-/**
-* Prints usage instructions.
-*/
-const printUsage = function () {
-    const instructions = `
-    Tic Tac Toe (by Will Moritz)
-    
-    usage: 
-    
-    tic-tac-toe <command>
-    
-    commands can be:
-    start:    start a new game
-    help:     show instructions
-    `;
-    
-    console.log(instructions);
+  currentPlayer: "X",
+  board: [
+    ["_", "_", "_"],
+    ["_", "_", "_"],
+    ["_", "_", "_"],
+  ],
+  turnNumber: 1,
 };
 
 /**
-* Prints current board state
-*/
+ * Prints usage instructions.
+ */
+function printWelcome() {
+  const instructions = `
+Let's play Tic Tac Toe!
+
+First, select your opponent:
+1 - Play against another human
+2 - Play against the computer
+
+Enter 1 or 2: `;
+
+  rl.question(instructions, (answer) => {
+    switch (answer) {
+      case "1":
+        startGameWithHuman();
+        break;
+      case "2":
+        startGameWithAI();
+        break;
+      default:
+        console.error(chalk.red("Invalid response. Please enter 1 or 2."));
+        rl.close();
+        break;
+    }
+  });
+}
+
+/**
+ * Prints current board state
+ */
 function showBoard() {
-    let result = ``;
-    
-    for (let i = 0; i < gameState.board.length; i++) {
-        const row = gameState.board[i];
-        let rowString = `   `;
-        for (let j = 0; j < row.length; j++) {
-            const cell = row[j];
-            rowString = rowString + cell + " ";
-        }
-        result = result + rowString + "\n";
+  let result = ``;
+
+  for (let i = 0; i < gameState.board.length; i++) {
+    const row = gameState.board[i];
+    let rowString = `   `;
+    for (let j = 0; j < row.length; j++) {
+      const cell = row[j];
+      rowString = rowString + cell + " ";
     }
-    
-    console.log(chalk.green(result));
+    result = result + rowString + "\n";
+  }
+
+  console.log(chalk.green(result));
 }
 
 /**
-* Starts a new game
-*/
-const start = function () {
-    promptMove();
-};
+ * Starts a new game with another human
+ */
+
+function startGameWithHuman() {
+  console.log("\nGet your fingers ready!\n");
+  promptMove();
+}
 
 /**
-* Checks board for three in a row.
-* Looks at the row and column of the current move, then both diagonals.
-* @param  {number} xCoord
-* @param  {number} yCoord
-*/
+ * Starts a new game with the computer
+ */
+function startGameWithAI() {
+  console.log("Let's figure out how to make an AI.");
+}
+
+/**
+ * Checks board for three in a row.
+ * Looks at the row and column of the current move, then both diagonals.
+ * @param  {number} xCoord
+ * @param  {number} yCoord
+ */
 function noWinner(xCoord, yCoord) {
-    const board = gameState.board;
-    
-    // Check current row
-    if (board[yCoord].every(isCurrentPlayer)) {
-        return false;
-    }
-    
-    // Check current column
-    const currColumn = [];
-    
-    for (let i = 0; i < board.length; i++) {
-        currColumn.push(board[i][xCoord]);
-    }
-    
-    if (currColumn.every(isCurrentPlayer)) {
-        return false;
-    }
-    
-    // Check diagonals
-    const diagonals = [
-        [board[0][0], board[1][1], board[2][2]],
-        [board[0][2], board[1][1], board[2][0]],
-    ];
-    
-    for (let i = 0; i < diagonals.length; i++) {
-        if (diagonals[i].every(isCurrentPlayer)) {
-            return false;
-        }
-    }
-    
-    return true;
-}
+  const board = gameState.board;
 
-function isCurrentPlayer(cell) {
-    return cell === gameState.currentPlayer;
+  // Check current row
+  if (board[yCoord].every(isCurrentPlayer)) {
+    return false;
+  }
+
+  // Check current column
+  const currColumn = [];
+
+  for (let i = 0; i < board.length; i++) {
+    currColumn.push(board[i][xCoord]);
+  }
+
+  if (currColumn.every(isCurrentPlayer)) {
+    return false;
+  }
+
+  // Check diagonals
+  const diagonals = [
+    [board[0][0], board[1][1], board[2][2]],
+    [board[0][2], board[1][1], board[2][0]],
+  ];
+
+  for (let i = 0; i < diagonals.length; i++) {
+    if (diagonals[i].every(isCurrentPlayer)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**
  * Switches players
  */
-function switchPlayer() {
-    if (gameState.currentPlayer === "X") {
-        gameState.currentPlayer = "O";
-    } else {
-        gameState.currentPlayer = "X";
-    }
+function nextTurn() {
+  if (gameState.currentPlayer === "X") {
+    gameState.currentPlayer = "O";
+  } else {
+    gameState.currentPlayer = "X";
+  }
+
+  gameState.turnNumber++;
 }
 
 /**
  * Prompts user for coordinates and saves to gameState
  */
-const promptMove = function () {    
-    showBoard();
-    
-    console.log(`${gameState.currentPlayer}'s turn:\n`);
-    rl.question("Enter X coordinate for your move: ", (x) => {
-        rl.question("Enter Y coordinate for your move: ", (y) => {
-            console.log("");
+const promptMove = function () {
+  console.log(`---------------------------------`);
+  console.log(`Turn ${gameState.turnNumber} ~ ${gameState.currentPlayer}'s move:\n`);
+  showBoard();
+  rl.question("Enter X coordinate: ", (x) => {
+    rl.question("Enter Y coordinate: ", (y) => {
+      console.log("");
 
-            if (!coordinatesAreValid(x, y)) {
-                promptMove();
-                return;
-            }
+      if (!coordinatesAreValid(x, y)) {
+        promptMove();
+        return;
+      }
 
-            gameState.board[y][x] = gameState.currentPlayer;
+      gameState.board[y][x] = gameState.currentPlayer;
 
-            if (noWinner(x, y)) {
-                switchPlayer();
-                promptMove();
-            } else {
-                declareWinner();
-            }
-        });
+      if (noWinner(x, y)) {
+        nextTurn();
+        promptMove();
+      } else {
+        declareWinner();
+      }
     });
+  });
 };
 
 /**
@@ -157,47 +165,39 @@ const promptMove = function () {
  * @param {number} y - Attempted move's Y coordinate
  */
 function coordinatesAreValid(x, y) {
-    if (x < 0 || x > 2 || y < 0 || y > 2) {
-        console.error(chalk.red("Coordinates are invalid.\n"));
-        return false;
-    } else if (gameState.board[y][x] !== "_") {
-        console.error(chalk.red("You may not play that position. Try again.\n"))
-        return false;
-    } else {
-        return true;
-    }
+  if (x < 0 || x > 2 || y < 0 || y > 2) {
+    console.error(chalk.red("Coordinates are invalid.\n"));
+    return false;
+  } else if (gameState.board[y][x] !== "_") {
+    console.error(chalk.red("You may not play that position. Try again.\n"));
+    return false;
+  } else {
+    return true;
+  }
+}
+
+/**
+ * @param  {string} cell - Checks whether a cell corresponds to the current player.
+ */
+function isCurrentPlayer(cell) {
+  return cell === gameState.currentPlayer;
 }
 
 /**
  * Prints out winner and closes game connection
  */
 function declareWinner() {
-    showBoard();
-    console.log(`${gameState.currentPlayer} has won! Game over.`);
-    rl.close();
+  console.log(`---------------------------------`);
+  showBoard();
+  console.log(chalk.green(`Game over! ${gameState.currentPlayer} has won.\n`));
+  rl.close();
 }
 
-/**
-* Initializes interactive console.
-*/
-const init = function () {
-    const commands = {
-        start: start,
-        help: printUsage,
-    };
-    
-    printUsage();
-    start();
-    
-    // // Listen for user input
-    // rl.on("line", (input) => {
-    //     input = input.toLowerCase();
-    //     if (input in commands) {
-    //         commands[input]();
-    //     } else {
-    //         console.log(`Invalid argument: ${input}`);
-    //     }
-    // });
-};
+// Set up readline
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  prompt: "",
+});
 
-init();
+printWelcome();
