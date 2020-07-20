@@ -4,13 +4,25 @@ const readline = require("readline");
 const chalk = require("chalk");
 
 const gameState = {
-  currentPlayer: chalk.red("X"),
+  players: [chalk.red("X"), chalk.blue("O")],
   board: [
     ["_", "_", "_"],
     ["_", "_", "_"],
     ["_", "_", "_"],
   ],
+  currentPlayerIndex: 0,
   turnNumber: 1,
+  nextTurn: function () {
+    if (this.currentPlayerIndex < (this.players.length - 1)) {
+      this.currentPlayerIndex++;
+    } else {
+      this.currentPlayerIndex = 0;
+    }
+    this.turnNumber++;
+  },
+  getCurrentPlayer: function () {
+    return this.players[this.currentPlayerIndex];
+  }
 };
 
 /**
@@ -82,7 +94,7 @@ function startGameWithAI() {
  */
 const promptMove = function () {
   console.log(`---------------------------------`);
-  console.log(`Turn ${gameState.turnNumber} ~ ${gameState.currentPlayer}'s move:\n`);
+  console.log(`Turn ${gameState.turnNumber} ~ ${gameState.getCurrentPlayer()}'s move:\n`);
   showBoard();
   rl.question("Enter X coordinate: ", (x) => {
     rl.question("Enter Y coordinate: ", (y) => {
@@ -91,10 +103,10 @@ const promptMove = function () {
         promptMove();
         return;
       }
-      gameState.board[y][x] = gameState.currentPlayer;
+      gameState.board[y][x] = gameState.getCurrentPlayer();
 
       if (noWinner(x, y)) {
-        nextTurn();
+        gameState.nextTurn();
         promptMove();
       } else {
         declareWinner();
@@ -167,20 +179,7 @@ function noWinner(xCoord, yCoord) {
  * @param  {string} cell - Checks whether a cell corresponds to the current player.
  */
 function isCurrentPlayer(cell) {
-  return cell === gameState.currentPlayer;
-}
-
-/**
- * Switches players
- */
-function nextTurn() {
-  if (gameState.currentPlayer === chalk.red("X")) {
-    gameState.currentPlayer = chalk.blue("O");
-  } else {
-    gameState.currentPlayer = chalk.red("X");
-  }
-
-  gameState.turnNumber++;
+  return cell === gameState.getCurrentPlayer();
 }
 
 /**
@@ -189,7 +188,7 @@ function nextTurn() {
 function declareWinner() {
   console.log(`---------------------------------`);
   showBoard();
-  console.log(chalk.green(`Game over! ${gameState.currentPlayer} has won.\n`));
+  console.log(chalk.green(`Game over! ${gameState.getCurrentPlayer()} has won.\n`));
   rl.close();
 }
 
