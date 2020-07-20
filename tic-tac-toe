@@ -111,7 +111,7 @@ const promptMove = function () {
 function coordinatesAreValid(x, y) {
   x = parseInt(x);
   y = parseInt(y);
-  
+
   if (isNaN(x) || isNaN(y) || x < 0 || x > 2 || y < 0 || y > 2) {
     console.error(chalk.red("Coordinates are invalid.\n"));
     return false;
